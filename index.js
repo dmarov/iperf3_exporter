@@ -35,8 +35,8 @@ const TARGET_IP = argv.target;
 const INTERVAL = argv.interval * 1000;
 
 const sendGauge = new promClient.Gauge({
-    name: 'send_bits_per_second',
-    help: 'send speed',
+    name: 'sent_bits_per_second',
+    help: 'sent speed',
     labelNames: ['target_ip'],
 });
 
