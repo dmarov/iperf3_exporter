@@ -25,7 +25,12 @@ const argv = yargs
     .option('t', {
         alias: 'target',
         type: 'string',
-        describe: 'target ip for iperf3',
+        describe: 'target ip or hostname for iperf3',
+    })
+    .option('time', {
+        type: 'int',
+        describe: 'iperf3 time option',
+        default: 1,
     })
     .demandOption(['t'])
     .argv;
@@ -37,13 +42,13 @@ const INTERVAL = argv.interval * 1000;
 const sendGauge = new promClient.Gauge({
     name: 'sent_bits_per_second',
     help: 'sent speed',
-    labelNames: ['target_ip'],
+    labelNames: ['target'],
 });
 
 const receivedGauge = new promClient.Gauge({
     name: 'received_bits_per_second',
     help: 'received speed',
-    labelNames: ['target_ip'],
+    labelNames: ['target'],
 });
 
 
@@ -80,18 +85,34 @@ function spawnPromise(...args) {
 
 setInterval(async _ => {
 
-    let data = await spawnPromise('iperf3', ['-i', '0', '-t', '1', '-c', TARGET_IP, '--json']);
-    let jsonData = JSON.parse(data.stdout);
+    try {
 
-    console.log(jsonData);
+        let data = await spawnPromise('iperf3', ['-i', '0', '-t', '1', '-c', TARGET_IP, '--json']);
+        let jsonData = JSON.parse(data.stdout);
 
-    sendGauge.set({
-        target_ip: TARGET_IP,
-    }, jsonData.end.sum_sent.bits_per_second);
+        console.log(jsonData);
 
-    receivedGauge.set({
-        target_ip: TARGET_IP,
-    }, jsonData.end.sum_received.bits_per_second);
+        sendGauge.set({
+            target: TARGET_IP,
+        }, jsonData.end.sum_sent.bits_per_second);
+
+        receivedGauge.set({
+            target: TARGET_IP,
+        }, jsonData.end.sum_received.bits_per_second);
+
+    } catch (error) {
+
+        console.log(error);
+
+        sendGauge.set({
+            target: TARGET_IP,
+        }, 0);
+
+        receivedGauge.set({
+            target: TARGET_IP,
+        }, 0);
+
+    }
 
 }, INTERVAL);
 
