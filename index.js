@@ -36,7 +36,7 @@ const argv = yargs
     .argv;
 
 const PORT = argv.port;
-const TARGET_IP = argv.target;
+const TARGET = argv.target;
 const INTERVAL = argv.interval * 1000;
 const TIME = argv.time;
 
@@ -89,18 +89,18 @@ setInterval(async _ => {
     try {
 
         let data = await spawnPromise(
-            'iperf3', ['-i', '0', '-t', TIME, '-c', TARGET_IP, '--json']
+            'iperf3', ['-i', '0', '-t', TIME, '-c', TARGET, '--json']
         );
         let jsonData = JSON.parse(data.stdout);
 
         console.log(jsonData);
 
         sendGauge.set({
-            target: TARGET_IP,
+            target: TARGET,
         }, jsonData.end.sum_sent.bits_per_second);
 
         receivedGauge.set({
-            target: TARGET_IP,
+            target: TARGET,
         }, jsonData.end.sum_received.bits_per_second);
 
     } catch (error) {
@@ -108,11 +108,11 @@ setInterval(async _ => {
         console.error(error);
 
         sendGauge.set({
-            target: TARGET_IP,
+            target: TARGET,
         }, 0);
 
         receivedGauge.set({
-            target: TARGET_IP,
+            target: TARGET,
         }, 0);
 
     }
