@@ -38,6 +38,7 @@ const argv = yargs
 const PORT = argv.port;
 const TARGET_IP = argv.target;
 const INTERVAL = argv.interval * 1000;
+const TIME = argv.time;
 
 const sendGauge = new promClient.Gauge({
     name: 'sent_bits_per_second',
@@ -87,7 +88,9 @@ setInterval(async _ => {
 
     try {
 
-        let data = await spawnPromise('iperf3', ['-i', '0', '-t', '1', '-c', TARGET_IP, '--json']);
+        let data = await spawnPromise(
+            'iperf3', ['-i', '0', '-t', TIME, '-c', TARGET_IP, '--json']
+        );
         let jsonData = JSON.parse(data.stdout);
 
         console.log(jsonData);
@@ -102,7 +105,7 @@ setInterval(async _ => {
 
     } catch (error) {
 
-        console.log(error);
+        console.error(error);
 
         sendGauge.set({
             target: TARGET_IP,
