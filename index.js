@@ -36,7 +36,16 @@ const argv = yargs
     .argv;
 
 const PORT = argv.port;
-const TARGET = argv.target;
+
+const matches = argv.target.match(/(.+)\:(\d+)/);
+let TARGET = argv.target;
+let TARGET_PORT = 5201;
+
+if (matches !== null) {
+    TARGET = matches[1];
+    TARGET_PORT = matches[2];
+}
+
 const INTERVAL = argv.interval * 1000;
 const TIME = argv.time;
 
@@ -89,7 +98,7 @@ setInterval(async _ => {
     try {
 
         let data = await spawnPromise(
-            'iperf3', ['-i', '0', '-t', TIME, '-c', TARGET, '--json']
+            'iperf3', ['-i', '0', '-t', TIME, '-c', TARGET, '-p', TARGET_PORT, '--json']
         );
         let jsonData = JSON.parse(data.stdout);
 
