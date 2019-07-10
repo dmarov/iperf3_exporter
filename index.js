@@ -102,7 +102,7 @@ setInterval(async _ => {
         );
         let jsonData = JSON.parse(data.stdout);
 
-        console.log(jsonData);
+        // console.log(jsonData);
 
         sendGauge.set({
             target: TARGET,
@@ -114,7 +114,7 @@ setInterval(async _ => {
 
     } catch (error) {
 
-        console.error(error);
+        // console.error(error);
 
         sendGauge.set({
             target: TARGET,
